@@ -6,6 +6,7 @@ public class TileGenerator : MonoBehaviour {
 
     private static int gridSize = 4;
     public Tile[,] grid = new Tile[gridSize, gridSize];
+    public Vector2[,] position = new Vector2[gridSize, gridSize];
     public List<Tile> TilePrefabs = new List<Tile>();
     public TileGenerator instance;
 
@@ -22,9 +23,13 @@ public class TileGenerator : MonoBehaviour {
         {
             int gridX = Random.Range(0, gridSize);
             int gridY = Random.Range(0, gridSize);
-            if(grid[gridX, gridY] == null)
+            Tile newTile = grid[gridX, gridY];
+            if(newTile == null)
             {
-                grid[gridX,gridY] = Instantiate(TilePrefabs[0]);
+                newTile = Instantiate(TilePrefabs[0]);
+                newTile.transform.SetParent(this.transform, false);
+                newTile.transform.position = position[gridX, gridY];
+                grid[gridX, gridY] = newTile;
                 isEmpty = false;
             }
         }
@@ -38,6 +43,21 @@ public class TileGenerator : MonoBehaviour {
     public void Equals(Tile other)
     {
 
+    }
+
+    public void SetDefaultTilePositions()
+    {
+        int y = 3;
+        for (int i = 0; i < gridSize; i++)
+        {
+            int x = -3;
+            for (int j = 0; j < gridSize; j++)
+            {
+                position[i, j] = new Vector2(x, y);
+                x += 2;
+            }
+            y -= 2;
+        }
     }
 
 	void Start ()
