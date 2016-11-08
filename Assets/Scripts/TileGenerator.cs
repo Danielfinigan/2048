@@ -27,7 +27,6 @@ public class TileGenerator : MonoBehaviour {
             if(newTile == null)
             {
                 newTile = Instantiate(TilePrefabs[0]);
-                newTile.transform.SetParent(this.transform, false);
                 newTile.transform.position = position[gridX, gridY];
                 grid[gridX, gridY] = newTile;
                 isEmpty = false;
@@ -62,6 +61,7 @@ public class TileGenerator : MonoBehaviour {
 
 	void Start ()
     {
+        SetDefaultTilePositions();
         AddTile();
 	}
 	

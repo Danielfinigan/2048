@@ -2,16 +2,9 @@
 using System.Collections;
 
 public class Tile : MonoBehaviour {
-
-    [SerializeField] private float x;
-    [SerializeField] private float y;
-
-    public Tile instance;
-
+    public int tileValue;
 	// Use this for initialization
 	void Start () {
-        this.transform.position = new Vector2(x, y);
-        instance = this;
 	}
 	
 	// Update is called once per frame
@@ -22,5 +15,10 @@ public class Tile : MonoBehaviour {
     void MergeTiles(Tile toBeDeleted)
     {
 
+    }
+
+    public bool Equals(Tile other)
+    {
+        return true;
     }
 }
