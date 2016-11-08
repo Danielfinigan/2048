@@ -39,9 +39,65 @@ public class TileGenerator : MonoBehaviour {
 
     }
 
-    public void Equals(Tile other)
+    public void MergeTiles(Tile tile1, Tile tile2)
     {
 
+    }
+
+    public void MoveVertical(string direction)
+    {
+        //set default direction to "up"
+        int offset = 1;
+        int startY = 0;
+
+        //check if direction is "down"
+        if (direction == "down")
+        {
+            offset = -1;
+            startY = gridSize - 1;
+        }
+
+        for(int x = 0; x < gridSize; x++)
+        {
+            for(int y = startY; y < gridSize; y++)
+            {
+                Tile tile1 = grid[x, y];
+                Tile tile2 = grid[x, y + offset];
+                //if current tile is empty and next tile is not empty, move tile
+                if (tile1 == null && tile2 != null)
+                {
+                    grid[x, y] = tile2;
+                }                
+            }
+        }
+    }
+
+    public void MoveHorizontal(string direction)
+    {
+        //set default direction to "right"
+        int offset = 1;
+        int startX = 0;
+
+        //check if direction is "left"
+        if (direction == "down")
+        {
+            offset = -1;
+            startX = gridSize - 1;
+        }
+
+        for (int x = 0; x < gridSize; x++)
+        {
+            for (int y = startX; y < gridSize; y++)
+            {
+                Tile tile1 = grid[x, y];
+                Tile tile2 = grid[x, y + offset];
+                //if current tile is empty and next tile is not empty, move tile
+                if (tile1 == null && tile2 != null)
+                {
+                    grid[x, y] = tile2;
+                }
+            }
+        }
     }
 
     public void SetDefaultTilePositions()
