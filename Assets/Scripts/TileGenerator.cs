@@ -10,6 +10,8 @@ public class TileGenerator : MonoBehaviour {
     public List<Tile> TilePrefabs = new List<Tile>();
     public TileGenerator instance;
 
+    public bool runOnce = false;
+
     void Awake()
     {
         instance = this;
@@ -34,6 +36,15 @@ public class TileGenerator : MonoBehaviour {
         }
     }
 
+    public void AddTile(Tile tile, int gridX, int gridY)
+    {
+        Tile newTile = grid[gridX, gridY];
+        newTile = Instantiate(tile);
+        newTile.transform.position = position[gridX, gridY];
+        grid[gridX, gridY] = newTile;
+        
+    }
+
     public void RemoveTile(Tile tile, int x, int y)
     {
         Destroy(tile.gameObject);
@@ -41,11 +52,6 @@ public class TileGenerator : MonoBehaviour {
     }
 
     public void MergeTiles(Tile tile1, Tile tile2)
-    {
-
-    }
-
-    public void Move()
     {
 
     }
@@ -64,7 +70,7 @@ public class TileGenerator : MonoBehaviour {
                     //if current tile is empty and next tile is not empty, move tile
                     if (tile1 == null && tile2 != null)
                     {
-                        grid[x, y] = tile2;
+                        AddTile(tile2, x, y);
                         RemoveTile(tile2, x, y - 1);
                     }
                 }
@@ -83,8 +89,8 @@ public class TileGenerator : MonoBehaviour {
                     //if current tile is empty and next tile is not empty, move tile
                     if (tile1 == null && tile2 != null)
                     {
-                        grid[x, y] = tile2;
-                        RemoveTile(x, y + 1);
+                        AddTile(tile2, x, y);
+                        RemoveTile(tile2, x, y + 1);
                     }
                 }
             }
@@ -101,8 +107,8 @@ public class TileGenerator : MonoBehaviour {
                     //if current tile is empty and next tile is not empty, move tile
                     if (tile1 == null && tile2 != null)
                     {
-                        grid[x, y] = tile2;
-                        RemoveTile(x - 1, y);
+                        AddTile(tile2, x, y);
+                        RemoveTile(tile2, x - 1, y);
                     }
                 }
             }
@@ -119,8 +125,8 @@ public class TileGenerator : MonoBehaviour {
                     //if current tile is empty and next tile is not empty, move tile
                     if (tile1 == null && tile2 != null)
                     {
-                        grid[x, y] = tile2;
-                        RemoveTile(x + 1, y);
+                        AddTile(tile2, x, y);
+                        RemoveTile(tile2, x + 1, y);
                     }
                 }
             }
@@ -153,27 +159,36 @@ public class TileGenerator : MonoBehaviour {
     {
         float verticalIsPressed = Input.GetAxisRaw("Vertical");
         float horizontalIsPressed = Input.GetAxisRaw("Horizontal");
+
+        if (verticalIsPressed == 0 && horizontalIsPressed == 0)
+            runOnce = false;
+
+
         //if vertical direction is pressed
-        if (verticalIsPressed == -1)
-        {
+        if (verticalIsPressed == -1 && !runOnce)
+        {            
             MoveTiles("down");
-            //AddTile();
+            AddTile();
+            runOnce = true;
         }
-        else if( verticalIsPressed == 1)
+        else if( verticalIsPressed == 1 && !runOnce)
         {
             MoveTiles("up");
-           // AddTile();
+            AddTile();
+            runOnce = true;
         }
         //if horizontal direction is pressed
-        if (horizontalIsPressed == -1)
+        if (horizontalIsPressed == -1 && !runOnce)
         {
             MoveTiles("left");
-           // AddTile();
+            AddTile();
+            runOnce = true;
         }
-        else if (horizontalIsPressed == 1)
+        else if (horizontalIsPressed == 1 && !runOnce)
         {
             MoveTiles("right");
-           // AddTile();
+            AddTile();
+            runOnce = true;
         }
     }
 	
