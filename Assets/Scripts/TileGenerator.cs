@@ -34,9 +34,10 @@ public class TileGenerator : MonoBehaviour {
         }
     }
 
-    public void RemoveTile()
+    public void RemoveTile(Tile tile, int x, int y)
     {
-
+        Destroy(tile.gameObject);
+        grid[x, y] = null;
     }
 
     public void MergeTiles(Tile tile1, Tile tile2)
@@ -44,60 +45,87 @@ public class TileGenerator : MonoBehaviour {
 
     }
 
-    public void MoveVertical(string direction)
+    public void Move()
     {
-        //set default direction to "up"
-        int offset = 1;
-        int startY = 0;
 
-        //check if direction is "down"
-        if (direction == "down")
-        {
-            offset = -1;
-            startY = gridSize - 1;
-        }
-
-        for(int x = 0; x < gridSize; x++)
-        {
-            for(int y = startY; y < gridSize; y++)
-            {
-                Tile tile1 = grid[x, y];
-                Tile tile2 = grid[x, y + offset];
-                //if current tile is empty and next tile is not empty, move tile
-                if (tile1 == null && tile2 != null)
-                {
-                    grid[x, y] = tile2;
-                }                
-            }
-        }
     }
 
-    public void MoveHorizontal(string direction)
+    public void MoveTiles(string direction)
     {
-        //set default direction to "right"
-        int offset = 1;
-        int startX = 0;
-
-        //check if direction is "left"
-        if (direction == "down")
+        //check if direction is "right"
+        if (direction == "right")
         {
-            offset = -1;
-            startX = gridSize - 1;
-        }
-
-        for (int x = 0; x < gridSize; x++)
-        {
-            for (int y = startX; y < gridSize; y++)
+            for (int x = 0; x < gridSize; x++)
             {
-                Tile tile1 = grid[x, y];
-                Tile tile2 = grid[x, y + offset];
-                //if current tile is empty and next tile is not empty, move tile
-                if (tile1 == null && tile2 != null)
+                for (int y = 3; y > 0; y--)
                 {
-                    grid[x, y] = tile2;
+                    Tile tile1 = grid[x, y];
+                    Tile tile2 = grid[x, y - 1];
+                    //if current tile is empty and next tile is not empty, move tile
+                    if (tile1 == null && tile2 != null)
+                    {
+                        grid[x, y] = tile2;
+                        RemoveTile(tile2, x, y - 1);
+                    }
                 }
             }
         }
+        //check if direction is "left"
+        else if (direction == "left")
+        {
+            
+            for (int x = 0; x < gridSize; x++)
+            {
+                for (int y = 0; y < gridSize - 1; y++)
+                {
+                    Tile tile1 = grid[x, y];
+                    Tile tile2 = grid[x, y + 1];
+                    //if current tile is empty and next tile is not empty, move tile
+                    if (tile1 == null && tile2 != null)
+                    {
+                        grid[x, y] = tile2;
+                        RemoveTile(x, y + 1);
+                    }
+                }
+            }
+        }
+        //check if direction is "down"
+        else if (direction == "down")
+        {
+            for (int y = 0; y < gridSize; y++)
+            {
+                for (int x = gridSize - 1; x > 0; x--)
+                {
+                    Tile tile1 = grid[x, y];
+                    Tile tile2 = grid[x - 1, y];
+                    //if current tile is empty and next tile is not empty, move tile
+                    if (tile1 == null && tile2 != null)
+                    {
+                        grid[x, y] = tile2;
+                        RemoveTile(x - 1, y);
+                    }
+                }
+            }
+        }
+        //check if direction is "up"
+        else if(direction == "up")
+        {
+            for (int y = 0; y < gridSize; y++)
+            {
+                for (int x = 0; x < gridSize - 1; x++)
+                {
+                    Tile tile1 = grid[x, y];
+                    Tile tile2 = grid[x + 1, y];
+                    //if current tile is empty and next tile is not empty, move tile
+                    if (tile1 == null && tile2 != null)
+                    {
+                        grid[x, y] = tile2;
+                        RemoveTile(x + 1, y);
+                    }
+                }
+            }
+        }
+       
     }
 
     public void SetDefaultTilePositions()
@@ -120,6 +148,34 @@ public class TileGenerator : MonoBehaviour {
         SetDefaultTilePositions();
         AddTile();
 	}
+
+    void Update()
+    {
+        float verticalIsPressed = Input.GetAxisRaw("Vertical");
+        float horizontalIsPressed = Input.GetAxisRaw("Horizontal");
+        //if vertical direction is pressed
+        if (verticalIsPressed == -1)
+        {
+            MoveTiles("down");
+            //AddTile();
+        }
+        else if( verticalIsPressed == 1)
+        {
+            MoveTiles("up");
+           // AddTile();
+        }
+        //if horizontal direction is pressed
+        if (horizontalIsPressed == -1)
+        {
+            MoveTiles("left");
+           // AddTile();
+        }
+        else if (horizontalIsPressed == 1)
+        {
+            MoveTiles("right");
+           // AddTile();
+        }
+    }
 	
 	// Update is called once per frame
 
