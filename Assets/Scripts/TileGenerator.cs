@@ -63,15 +63,23 @@ public class TileGenerator : MonoBehaviour {
         {
             for (int x = 0; x < gridSize; x++)
             {
-                for (int y = 3; y > 0; y--)
+                int emptyTileY = gridSize - 1;
+                Tile tile1 = grid[x, emptyTileY];
+                for (int y = gridSize - 1; y > 0; y--)
                 {
-                    Tile tile1 = grid[x, y];
                     Tile tile2 = grid[x, y - 1];
                     //if current tile is empty and next tile is not empty, move tile
                     if (tile1 == null && tile2 != null)
                     {
-                        AddTile(tile2, x, y);
+                        AddTile(tile2, x, emptyTileY);
                         RemoveTile(tile2, x, y - 1);
+                        emptyTileY -= 1;
+                        tile1 = grid[x, emptyTileY];
+                    }
+                    else if (tile1 != null)
+                    {
+                        emptyTileY -= 1;
+                        tile1 = grid[x, emptyTileY];
                     }
                 }
             }
@@ -100,15 +108,23 @@ public class TileGenerator : MonoBehaviour {
         {
             for (int y = 0; y < gridSize; y++)
             {
+                int emptyTileX = gridSize - 1;
+                Tile tile1 = grid[emptyTileX, y];
                 for (int x = gridSize - 1; x > 0; x--)
-                {
-                    Tile tile1 = grid[x, y];
+                {                    
                     Tile tile2 = grid[x - 1, y];
                     //if current tile is empty and next tile is not empty, move tile
                     if (tile1 == null && tile2 != null)
                     {
-                        AddTile(tile2, x, y);
+                        AddTile(tile2, emptyTileX, y);
                         RemoveTile(tile2, x - 1, y);
+                        emptyTileX -= 1;
+                        tile1 = grid[emptyTileX, y];
+                    }
+                    else if (tile1 != null)
+                    {
+                        emptyTileX += 1;
+                        tile1 = grid[emptyTileX, y];
                     }
                 }
             }
@@ -168,13 +184,13 @@ public class TileGenerator : MonoBehaviour {
         if (verticalIsPressed == -1 && !runOnce)
         {            
             MoveTiles("down");
-            AddTile();
+          //  AddTile();
             runOnce = true;
         }
         else if( verticalIsPressed == 1 && !runOnce)
         {
             MoveTiles("up");
-            AddTile();
+           // AddTile();
             runOnce = true;
         }
         //if horizontal direction is pressed
@@ -187,7 +203,7 @@ public class TileGenerator : MonoBehaviour {
         else if (horizontalIsPressed == 1 && !runOnce)
         {
             MoveTiles("right");
-            AddTile();
+            //AddTile();
             runOnce = true;
         }
     }
