@@ -19,6 +19,9 @@ public class Tile : MonoBehaviour {
 
     public bool Equals(Tile other)
     {
-        return true;
+        if (this.tileValue == other.tileValue)
+            return true;
+        else
+            return false;
     }
 }

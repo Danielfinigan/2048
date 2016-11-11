@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+//using System;
 
 public class TileGenerator : MonoBehaviour {
 
@@ -51,14 +52,32 @@ public class TileGenerator : MonoBehaviour {
         grid[x, y] = null;
     }
 
-    public void MergeTiles(Tile tile1, Tile tile2)
+    public void MergeTiles(string direction)
     {
-
+        if (direction == "right")
+        {
+            for(int x = 0; x < gridSize; x++)
+            {
+                for(int y = gridSize - 1; y > 0; y--)
+                {
+                    Tile tile1 = grid[x, y];
+                    Tile tile2 = grid[x, y - 1];
+                    if(tile1 != null && tile2 != null)
+                    {
+                        if(tile1.Equals(tile2))
+                        {
+                            int nextTile = (int) System.Math.Log(tile1.tileValue)+1;
+                            AddTile(TilePrefabs[nextTile], x, y);
+                            RemoveTile(tile2, x, y - 1);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void MoveTiles(string direction)
     {
-        //check if direction is "right"
         if (direction == "right")
         {
             for (int x = 0; x < gridSize; x++)
@@ -84,7 +103,6 @@ public class TileGenerator : MonoBehaviour {
                 }
             }
         }
-        //check if direction is "left"
         else if (direction == "left")
         {
             for (int x = 0; x < gridSize; x++)
@@ -110,7 +128,6 @@ public class TileGenerator : MonoBehaviour {
                 }
             }
         }
-        //check if direction is "down"
         else if (direction == "down")
         {
             for (int y = 0; y < gridSize; y++)
@@ -136,7 +153,6 @@ public class TileGenerator : MonoBehaviour {
                 }
             }
         }
-        //check if direction is "up"
         else if(direction == "up")
         {
             for (int y = 0; y < gridSize; y++)
@@ -218,6 +234,7 @@ public class TileGenerator : MonoBehaviour {
         else if (horizontalIsPressed == 1 && !runOnce)
         {
             MoveTiles("right");
+            MergeTiles("right");
             AddTile();
             runOnce = true;
         }
