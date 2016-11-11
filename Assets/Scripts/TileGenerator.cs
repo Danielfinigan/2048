@@ -105,7 +105,7 @@ public class TileGenerator : MonoBehaviour {
                         if (tile1.Equals(tile2))
                         {
                             int nextTile = (int)System.Math.Log(tile1.tileValue, 2);
-
+                            GameManager.instance.score += tile1.tileValue;
                             RemoveTile(tile1, x, y);
                             RemoveTile(tile2, x, y + 1);
                             AddTile(TilePrefabs[nextTile], x, y);
@@ -127,7 +127,7 @@ public class TileGenerator : MonoBehaviour {
                         if (tile1.Equals(tile2))
                         {
                             int nextTile = (int)System.Math.Log(tile1.tileValue, 2);
-
+                            GameManager.instance.score += tile1.tileValue;
                             RemoveTile(tile1, x, y);
                             RemoveTile(tile2, x - 1, y);
                             AddTile(TilePrefabs[nextTile], x, y);
@@ -149,7 +149,7 @@ public class TileGenerator : MonoBehaviour {
                         if (tile1.Equals(tile2))
                         {
                             int nextTile = (int)System.Math.Log(tile1.tileValue, 2);
-
+                            GameManager.instance.score += tile1.tileValue;
                             RemoveTile(tile1, x, y);
                             RemoveTile(tile2, x + 1, y);
                             AddTile(TilePrefabs[nextTile], x, y);

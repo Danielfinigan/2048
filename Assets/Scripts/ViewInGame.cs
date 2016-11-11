@@ -11,6 +11,7 @@ public class ViewInGame : MonoBehaviour {
 	    if(GameManager.instance.currentGameState == GameState.inGame)
         {
             scoreLabel.text = "Score: \n" + GameManager.instance.score;
+            highScoreLabel.text = "High Score: \n" + PlayerPrefs.GetInt("HighScore").ToString("0000");
         }
 	}
 }

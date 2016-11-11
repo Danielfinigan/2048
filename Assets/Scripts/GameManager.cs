@@ -25,10 +25,12 @@ public class GameManager : MonoBehaviour
     public GameObject YouWonScreen;
 
     public int score;
+    public int highScore;
     // Use this for initialization
     void Awake()
     {
         instance = this;
+        highScore = PlayerPrefs.GetInt("HighScore", 0);
     }
 
     public void StartGame ()
@@ -92,7 +94,13 @@ public class GameManager : MonoBehaviour
         currentGameState = newGameState;
     }
     // Update is called once per frame
-    void Update () {
-	
+    void Update ()
+    {
+        if (highScore < score)
+        {
+            highScore = score;
+            PlayerPrefs.SetInt("HighScore", this.highScore);
+        }
+            
 	}
 }
