@@ -87,7 +87,7 @@ public class GameManager : MonoBehaviour
         else if (newGameState == GameState.youWin)
         {
             StartScreen.SetActive(false);
-            InGameScreen.SetActive(false);
+            InGameScreen.SetActive(true);
             GameOverScreen.SetActive(false);
             YouWonScreen.SetActive(true);
         }

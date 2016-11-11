@@ -25,40 +25,35 @@ public class TileGenerator : MonoBehaviour {
 
     public void AddTile()
     {
-        if (numOfTiles < 16)
+        bool isEmpty = true;
+        while (isEmpty)
         {
-            bool isEmpty = true;
-            while (isEmpty)
+            int gridX = Random.Range(0, gridSize);
+            int gridY = Random.Range(0, gridSize);
+            Tile newTile = grid[gridX, gridY];
+            if (newTile == null)
             {
-                int gridX = Random.Range(0, gridSize);
-                int gridY = Random.Range(0, gridSize);
-                Tile newTile = grid[gridX, gridY];
-                if (newTile == null)
-                {
-                    newTile = Instantiate(TilePrefabs[0]);
-                    newTile.transform.position = position[gridX, gridY];
-                    grid[gridX, gridY] = newTile;
-                    isEmpty = false;
-                    numOfTiles++;
-                }
+                newTile = Instantiate(TilePrefabs[0]);
+                newTile.transform.position = position[gridX, gridY];
+                grid[gridX, gridY] = newTile;
+                isEmpty = false;
+                numOfTiles++;
             }
         }
-        else
+        if(!CanMove())
             GameManager.instance.GameOver();        
     }
 
     public void AddTile(Tile tile, int gridX, int gridY)
     {
-        if (numOfTiles < 16)
-        {
-            Tile newTile = grid[gridX, gridY];
-            newTile = Instantiate(tile);
-            newTile.transform.position = position[gridX, gridY];
-            grid[gridX, gridY] = newTile;
-            numOfTiles++;
-        }
-        else
-            GameManager.instance.GameOver();       
+        Tile newTile = grid[gridX, gridY];
+        newTile = Instantiate(tile);
+        newTile.transform.position = position[gridX, gridY];
+        grid[gridX, gridY] = newTile;
+        numOfTiles++;
+        if (newTile.Equals(TilePrefabs[10]))
+            GameManager.instance.YouWon();
+           
     }
 
     public void RemoveTile(Tile tile, int x, int y)
@@ -269,6 +264,34 @@ public class TileGenerator : MonoBehaviour {
                 }
             }
         }       
+    }
+
+    public bool CanMove()
+    {
+        if (numOfTiles < 16)
+            return true;
+        else
+        {
+            //check rows
+            for (int x = 0; x < gridSize - 1; x++)
+            {
+                for (int y = 0; y < gridSize - 1; y++)
+                {
+                    if (grid[x, y].Equals(grid[x, y + 1]))
+                        return true;
+                }
+            }
+            //check columns
+            for (int y = 0; y < gridSize - 1; y++)
+            {
+                for (int x = 0; x < gridSize - 1; x++)
+                {
+                    if (grid[x, y].Equals(grid[x + 1, y]))
+                        return true;
+                }
+            }
+        }
+            return false;
     }
 
     public void SetDefaultTilePositions()
