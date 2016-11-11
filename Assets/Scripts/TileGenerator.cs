@@ -5,13 +5,17 @@ using System.Collections.Generic;
 
 public class TileGenerator : MonoBehaviour {
 
+
+    public static TileGenerator instance;
     private static int gridSize = 4;
+
     public Tile[,] grid = new Tile[gridSize, gridSize];
     public Vector2[,] position = new Vector2[gridSize, gridSize];
     public List<Tile> TilePrefabs = new List<Tile>();
-    public TileGenerator instance;
 
+    public bool hasMoved = false;
     public bool runOnce = false;
+    public int numOfTiles;
 
     void Awake()
     {
@@ -21,35 +25,47 @@ public class TileGenerator : MonoBehaviour {
 
     public void AddTile()
     {
-        bool isEmpty = true;
-        while(isEmpty)
+        if (numOfTiles < 16)
         {
-            int gridX = Random.Range(0, gridSize);
-            int gridY = Random.Range(0, gridSize);
-            Tile newTile = grid[gridX, gridY];
-            if(newTile == null)
+            bool isEmpty = true;
+            while (isEmpty)
             {
-                newTile = Instantiate(TilePrefabs[0]);
-                newTile.transform.position = position[gridX, gridY];
-                grid[gridX, gridY] = newTile;
-                isEmpty = false;
+                int gridX = Random.Range(0, gridSize);
+                int gridY = Random.Range(0, gridSize);
+                Tile newTile = grid[gridX, gridY];
+                if (newTile == null)
+                {
+                    newTile = Instantiate(TilePrefabs[0]);
+                    newTile.transform.position = position[gridX, gridY];
+                    grid[gridX, gridY] = newTile;
+                    isEmpty = false;
+                    numOfTiles++;
+                }
             }
         }
+        else
+            GameManager.instance.GameOver();        
     }
 
     public void AddTile(Tile tile, int gridX, int gridY)
     {
-        Tile newTile = grid[gridX, gridY];
-        newTile = Instantiate(tile);
-        newTile.transform.position = position[gridX, gridY];
-        grid[gridX, gridY] = newTile;
-        
+        if (numOfTiles < 16)
+        {
+            Tile newTile = grid[gridX, gridY];
+            newTile = Instantiate(tile);
+            newTile.transform.position = position[gridX, gridY];
+            grid[gridX, gridY] = newTile;
+            numOfTiles++;
+        }
+        else
+            GameManager.instance.GameOver();       
     }
 
     public void RemoveTile(Tile tile, int x, int y)
     {
         Destroy(tile.gameObject);
         grid[x, y] = null;
+        numOfTiles--;
     }
 
     public void MergeTiles(string direction)
@@ -66,9 +82,77 @@ public class TileGenerator : MonoBehaviour {
                     {
                         if(tile1.Equals(tile2))
                         {
-                            int nextTile = (int) System.Math.Log(tile1.tileValue)+1;
-                            AddTile(TilePrefabs[nextTile], x, y);
+                            int nextTile = (int) System.Math.Log(tile1.tileValue, 2);
+                            GameManager.instance.score += tile1.tileValue;
+                            RemoveTile(tile1, x, y);
                             RemoveTile(tile2, x, y - 1);
+                            AddTile(TilePrefabs[nextTile], x, y);
+                        }
+                    }
+                }
+            }
+        }
+        else if (direction == "left")
+        {
+            for (int x = 0; x < gridSize; x++)
+            {
+                for (int y = 0; y < gridSize - 1; y++)
+                {
+                    Tile tile1 = grid[x, y];
+                    Tile tile2 = grid[x, y + 1];
+                    if (tile1 != null && tile2 != null)
+                    {
+                        if (tile1.Equals(tile2))
+                        {
+                            int nextTile = (int)System.Math.Log(tile1.tileValue, 2);
+
+                            RemoveTile(tile1, x, y);
+                            RemoveTile(tile2, x, y + 1);
+                            AddTile(TilePrefabs[nextTile], x, y);
+                        }
+                    }
+                }
+            }
+        }
+        else if (direction == "down")
+        {
+            for (int y = 0; y < gridSize; y++)
+            {
+                for (int x = gridSize - 1; x > 0; x--)
+                {
+                    Tile tile1 = grid[x, y];
+                    Tile tile2 = grid[x - 1, y];
+                    if (tile1 != null && tile2 != null)
+                    {
+                        if (tile1.Equals(tile2))
+                        {
+                            int nextTile = (int)System.Math.Log(tile1.tileValue, 2);
+
+                            RemoveTile(tile1, x, y);
+                            RemoveTile(tile2, x - 1, y);
+                            AddTile(TilePrefabs[nextTile], x, y);
+                        }
+                    }
+                }
+            }
+        }
+        else if (direction == "up")
+        {
+            for (int y = 0; y < gridSize; y++)
+            {
+                for (int x = 0; x < gridSize - 1; x++)
+                {
+                    Tile tile1 = grid[x, y];
+                    Tile tile2 = grid[x + 1, y];
+                    if (tile1 != null && tile2 != null)
+                    {
+                        if (tile1.Equals(tile2))
+                        {
+                            int nextTile = (int)System.Math.Log(tile1.tileValue, 2);
+
+                            RemoveTile(tile1, x, y);
+                            RemoveTile(tile2, x + 1, y);
+                            AddTile(TilePrefabs[nextTile], x, y);
                         }
                     }
                 }
@@ -78,107 +162,113 @@ public class TileGenerator : MonoBehaviour {
 
     public void MoveTiles(string direction)
     {
-        if (direction == "right")
+        if(GameManager.instance.currentGameState == GameState.inGame)
         {
-            for (int x = 0; x < gridSize; x++)
+            if (direction == "right")
             {
-                int emptyTileY = gridSize - 1;
-                Tile tile1 = grid[x, emptyTileY];
-                for (int y = gridSize - 1; y > 0; y--)
+                for (int x = 0; x < gridSize; x++)
                 {
-                    Tile tile2 = grid[x, y - 1];
-                    //if current tile is empty and next tile is not empty, move tile
-                    if (tile1 == null && tile2 != null)
+                    int emptyTileY = gridSize - 1;
+                    Tile tile1 = grid[x, emptyTileY];
+                    for (int y = gridSize - 1; y > 0; y--)
                     {
-                        AddTile(tile2, x, emptyTileY);
-                        RemoveTile(tile2, x, y - 1);
-                        emptyTileY -= 1;
-                        tile1 = grid[x, emptyTileY];
-                    }
-                    else if (tile1 != null)
-                    {
-                        emptyTileY -= 1;
-                        tile1 = grid[x, emptyTileY];
+                        Tile tile2 = grid[x, y - 1];
+                        //if current tile is empty and next tile is not empty, move tile
+                        if (tile1 == null && tile2 != null)
+                        {
+                            AddTile(tile2, x, emptyTileY);
+                            RemoveTile(tile2, x, y - 1);
+                            emptyTileY -= 1;
+                            tile1 = grid[x, emptyTileY];
+                            hasMoved = true;
+                        }
+                        else if (tile1 != null)
+                        {
+                            emptyTileY -= 1;
+                            tile1 = grid[x, emptyTileY];
+                        }
                     }
                 }
             }
-        }
-        else if (direction == "left")
-        {
-            for (int x = 0; x < gridSize; x++)
+            else if (direction == "left")
             {
-                int emptyTileY = 0;
-                Tile tile1 = grid[x, emptyTileY];
-                for (int y = 0; y < gridSize - 1; y++)
+                for (int x = 0; x < gridSize; x++)
                 {
-                    Tile tile2 = grid[x, y + 1];
-                    //if current tile is empty and next tile is not empty, move tile
-                    if (tile1 == null && tile2 != null)
+                    int emptyTileY = 0;
+                    Tile tile1 = grid[x, emptyTileY];
+                    for (int y = 0; y < gridSize - 1; y++)
                     {
-                        AddTile(tile2, x, emptyTileY);
-                        RemoveTile(tile2, x, y + 1);
-                        emptyTileY += 1;
-                        tile1 = grid[x, emptyTileY];
-                    }
-                    else if (tile1 != null)
-                    {
-                        emptyTileY += 1;
-                        tile1 = grid[x, emptyTileY];
-                    }
-                }
-            }
-        }
-        else if (direction == "down")
-        {
-            for (int y = 0; y < gridSize; y++)
-            {
-                int emptyTileX = gridSize - 1;
-                Tile tile1 = grid[emptyTileX, y];
-                for (int x = gridSize - 1; x > 0; x--)
-                {                    
-                    Tile tile2 = grid[x - 1, y];
-                    //if current tile is empty and next tile is not empty, move tile
-                    if (tile1 == null && tile2 != null)
-                    {
-                        AddTile(tile2, emptyTileX, y);
-                        RemoveTile(tile2, x - 1, y);
-                        emptyTileX -= 1;
-                        tile1 = grid[emptyTileX, y];
-                    }
-                    else if (tile1 != null)
-                    {
-                        emptyTileX -= 1;
-                        tile1 = grid[emptyTileX, y];
+                        Tile tile2 = grid[x, y + 1];
+                        //if current tile is empty and next tile is not empty, move tile
+                        if (tile1 == null && tile2 != null)
+                        {
+                            AddTile(tile2, x, emptyTileY);
+                            RemoveTile(tile2, x, y + 1);
+                            emptyTileY += 1;
+                            tile1 = grid[x, emptyTileY];
+                            hasMoved = true;
+                        }
+                        else if (tile1 != null)
+                        {
+                            emptyTileY += 1;
+                            tile1 = grid[x, emptyTileY];
+                        }
                     }
                 }
             }
-        }
-        else if(direction == "up")
-        {
-            for (int y = 0; y < gridSize; y++)
+            else if (direction == "down")
             {
-                int emptyTileX = 0;
-                Tile tile1 = grid[emptyTileX, y];
-                for (int x = 0; x < gridSize - 1; x++)
+                for (int y = 0; y < gridSize; y++)
                 {
-                    Tile tile2 = grid[x + 1, y];
-                    //if current tile is empty and next tile is not empty, move tile
-                    if (tile1 == null && tile2 != null)
+                    int emptyTileX = gridSize - 1;
+                    Tile tile1 = grid[emptyTileX, y];
+                    for (int x = gridSize - 1; x > 0; x--)
                     {
-                        AddTile(tile2, emptyTileX, y);
-                        RemoveTile(tile2, x + 1, y);
-                        emptyTileX += 1;
-                        tile1 = grid[emptyTileX, y];
-                    }
-                    else if(tile1 != null)
-                    {
-                        emptyTileX += 1;
-                        tile1 = grid[emptyTileX, y];
+                        Tile tile2 = grid[x - 1, y];
+                        //if current tile is empty and next tile is not empty, move tile
+                        if (tile1 == null && tile2 != null)
+                        {
+                            AddTile(tile2, emptyTileX, y);
+                            RemoveTile(tile2, x - 1, y);
+                            emptyTileX -= 1;
+                            tile1 = grid[emptyTileX, y];
+                            hasMoved = true;
+                        }
+                        else if (tile1 != null)
+                        {
+                            emptyTileX -= 1;
+                            tile1 = grid[emptyTileX, y];
+                        }
                     }
                 }
             }
-        }
-       
+            else if (direction == "up")
+            {
+                for (int y = 0; y < gridSize; y++)
+                {
+                    int emptyTileX = 0;
+                    Tile tile1 = grid[emptyTileX, y];
+                    for (int x = 0; x < gridSize - 1; x++)
+                    {
+                        Tile tile2 = grid[x + 1, y];
+                        //if current tile is empty and next tile is not empty, move tile
+                        if (tile1 == null && tile2 != null)
+                        {
+                            AddTile(tile2, emptyTileX, y);
+                            RemoveTile(tile2, x + 1, y);
+                            emptyTileX += 1;
+                            tile1 = grid[emptyTileX, y];
+                            hasMoved = true;
+                        }
+                        else if (tile1 != null)
+                        {
+                            emptyTileX += 1;
+                            tile1 = grid[emptyTileX, y];
+                        }
+                    }
+                }
+            }
+        }       
     }
 
     public void SetDefaultTilePositions()
@@ -196,7 +286,7 @@ public class TileGenerator : MonoBehaviour {
         }
     }
 
-	void Start ()
+	public void StartGame ()
     {
         SetDefaultTilePositions();
         AddTile();
@@ -209,37 +299,47 @@ public class TileGenerator : MonoBehaviour {
 
         if (verticalIsPressed == 0 && horizontalIsPressed == 0)
             runOnce = false;
-
-
         //if vertical direction is pressed
         if (verticalIsPressed == -1 && !runOnce)
         {            
             MoveTiles("down");
-            AddTile();
+            MergeTiles("down");
+            MoveTiles("down");
+            if (hasMoved)
+                AddTile();
+            hasMoved = false;
             runOnce = true;
         }
         else if( verticalIsPressed == 1 && !runOnce)
         {
             MoveTiles("up");
-            AddTile();
+            MergeTiles("up");
+            MoveTiles("up");
+            if (hasMoved)
+                AddTile();
+            hasMoved = false;
             runOnce = true;
         }
         //if horizontal direction is pressed
         if (horizontalIsPressed == -1 && !runOnce)
         {
             MoveTiles("left");
-            AddTile();
+            MergeTiles("left");
+            MoveTiles("left");
+            if (hasMoved)
+                AddTile();
+            hasMoved = false;
             runOnce = true;
         }
         else if (horizontalIsPressed == 1 && !runOnce)
         {
             MoveTiles("right");
             MergeTiles("right");
-            AddTile();
+            MoveTiles("right");
+            if(hasMoved)
+                AddTile();
+            hasMoved = false;
             runOnce = true;
-        }
+        }        
     }
-	
-	// Update is called once per frame
-
 }
